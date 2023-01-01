@@ -38,14 +38,24 @@ listStyle:none;
 text-decoration: 'line-through';
 `;
 
+const Warning = styled.p`
+color: red;
+font-weight: 600;
+font-size:0.8rem;
+margin-top: 0;
+`;
+
 function App() {
 
   const [input, setInput] = useState('');
   const [todoList, setTodoList] = useState([]);
   const [completedTaskCount, setCompletedTaskCount] = useState(0);
-
+  const [warning, setWarning] = useState('');
   function handleClick(){
     const id = todoList.length + 1;
+    if(!input) {
+        setWarning('The input box cannot be empty.'); //input check
+    } else {
     setTodoList( (previous)=>[
       ...previous,
       {
@@ -55,7 +65,8 @@ function App() {
       },
     ])
     setInput(''); //clear input once the new item has been added.
-    }
+    setWarning(''); //clear warning
+  } }
   
     function handleComplete(id){
       let list = todoList.map((task)=>{
@@ -73,13 +84,21 @@ function App() {
       setTodoList(list);
     }
 
+    function handleClear(){
+        setTodoList([])
+        setWarning('')
+        setCompletedTaskCount(0)
+    }
+
   return (
     <Container>
         <div>
           <h2>Todo List</h2>
           <Text value={input} onInput = {(event)=>setInput(event.target.value)}/>
+          
           <Button onClick={()=>handleClick()}>Add</Button>
-          <Button onClick = {()=>setTodoList([])}>Clear</Button>
+          <Button onClick = {()=>handleClear()}>Clear</Button>
+          <Warning>{warning}</Warning>
           <Tasks>
             <TaskCount>
               <b>Pending Tasks</b> {todoList.length - completedTaskCount}
