@@ -12,6 +12,7 @@ flex-direction: column;
 const Text = styled.input`
 border: 2px solid #000;
 height:1.5rem;
+border-radius:5px;
 `
 const Button = styled.button`
 display: inline-block;
@@ -24,6 +25,7 @@ width: 50px;
 border-radius: 2px;
 cursor: pointer;
 margin:5px;
+border-radius:5px;
 `;
 
 const Tasks = styled.div`
@@ -43,6 +45,7 @@ color: red;
 font-weight: 600;
 font-size:0.8rem;
 margin-top: 0;
+margin-left:5px;
 `;
 
 const TaskArea = styled.div`
@@ -72,7 +75,7 @@ function App() {
         task:input,
         complete:false,
       },
-    ])
+    ]) //save new items to parent list for future filter
     setList((previous)=>[
       ...previous,
       {
@@ -80,7 +83,7 @@ function App() {
         task:input,
         complete:false,
       }
-    ])
+    ]) //initial set up for the pending tasks
     setInput(''); //clear input once the new item has been added.
     setWarning(''); //clear warning
   } }
@@ -96,7 +99,7 @@ function App() {
 
      pendingTask = todoList.filter((item)=>!item.complete);
      completeTask = todoList.filter((item)=>item.complete);
-    
+      //update ui
       setList(pendingTask);
       setCompleteTask(completeTask);
       
@@ -104,7 +107,7 @@ function App() {
     }
 
     function handleReverse(id) {
-      todoList.forEach((task)=>{ //need to mutate original list, don't use map.
+      todoList.forEach((task)=>{ //need to mutate original list & change status of the task, don't use map.
         if (task.id == id) {
           if(task.complete) {
             setCompletedTaskCount(completedTaskCount - 1);
@@ -113,6 +116,8 @@ function App() {
       }});
       completeTask = todoList.filter((item)=>item.complete);
       pendingTask = todoList.filter((item)=>!item.complete);
+
+      //update ui
       setCompleteTask(completeTask);
       setList(pendingTask);
     }
@@ -129,12 +134,14 @@ function App() {
   return (
     <Container>
         <div>
-          <h2>Todo List</h2>
+          <h2>To-do List App</h2>
+          <div className='formHandle'>
           <Text value={input} onInput = {(event)=>setInput(event.target.value)}/>
           
           <Button onClick={()=>handleClick()}>Add</Button>
           <Button onClick = {()=>handleClear()}>Clear</Button>
-          <Warning>{warning}</Warning>
+          
+          </div><Warning>{warning}</Warning>
           <Tasks>
             <TaskCount>
               <b>Pending Tasks</b> {todoList.length - completedTaskCount}
