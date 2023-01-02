@@ -45,12 +45,21 @@ font-size:0.8rem;
 margin-top: 0;
 `;
 
+const TaskArea = styled.div`
+display: grid;
+grid-template-columns: 50% 50%;
+`;
+
 function App() {
 
   const [input, setInput] = useState('');
-  const [todoList, setTodoList] = useState([]);
+  const [todoList, setTodoList] = useState([]); //parent input list
   const [completedTaskCount, setCompletedTaskCount] = useState(0);
   const [warning, setWarning] = useState('');
+  let [pendingTask, setPendingTask] = useState([]); //filtered from list
+  let [completeTask, setCompleteTask] = useState([]);  //filtered from list
+  let [list, setList] = useState([]); //processed list from todolist
+
   function handleClick(){
     const id = todoList.length + 1;
     if(!input) {
@@ -64,28 +73,55 @@ function App() {
         complete:false,
       },
     ])
+    setList((previous)=>[
+      ...previous,
+      {
+        id:id,
+        task:input,
+        complete:false,
+      }
+    ])
     setInput(''); //clear input once the new item has been added.
     setWarning(''); //clear warning
   } }
   
     function handleComplete(id){
-      let list = todoList.map((task)=>{
-        let item = {};
+      todoList.forEach((task)=>{ //need to mutate original list, don't use map.
         if (task.id == id) {
           if(!task.complete) {
             setCompletedTaskCount(completedTaskCount + 1);
-          } else {
+            task.complete = !task.complete;
+          } 
+      }});
+
+     pendingTask = todoList.filter((item)=>!item.complete);
+     completeTask = todoList.filter((item)=>item.complete);
+    
+      setList(pendingTask);
+      setCompleteTask(completeTask);
+      
+      
+    }
+
+    function handleReverse(id) {
+      todoList.forEach((task)=>{ //need to mutate original list, don't use map.
+        if (task.id == id) {
+          if(task.complete) {
             setCompletedTaskCount(completedTaskCount - 1);
-          }
-          item = {...task, complete: !task.complete};
-        } else item = {...task};
-        return item;
-      });
-      setTodoList(list);
+            task.complete = !task.complete;
+          } 
+      }});
+      completeTask = todoList.filter((item)=>item.complete);
+      pendingTask = todoList.filter((item)=>!item.complete);
+      setCompleteTask(completeTask);
+      setList(pendingTask);
     }
 
     function handleClear(){
         setTodoList([])
+        setList([])
+        setCompleteTask([])
+        setPendingTask([])
         setWarning('')
         setCompletedTaskCount(0)
     }
@@ -107,10 +143,11 @@ function App() {
               <b>Completed Tasks</b> {completedTaskCount}
             </TaskCount>
           </Tasks>
-          <div>
+          <TaskArea>
+          <div className='pendingTasks'>
             <ul>
             {
-              todoList.map((todo)=>{
+              list.map((todo)=>{
                 return (
                   <LIST 
                   complete = {todo.complete}
@@ -130,7 +167,30 @@ function App() {
             }
             </ul>
           </div>
-          
+          <div className='completedTasks'>
+            <ul>
+            {
+              completeTask.map((todo)=>{
+                return (
+                  <LIST 
+                  complete = {todo.complete}
+                  id={todo.id}
+                  onClick = {()=>handleReverse(todo.id)}
+                  style={
+                    {
+                      listStyle:"none",
+                      textDecoration: todo.complete &&"line-through",
+                    }
+                  }
+                  >
+                    {todo.task}
+                  </LIST>
+                )
+              })
+            }
+            </ul>
+          </div>
+          </TaskArea>
         </div>
     </Container>
   )
